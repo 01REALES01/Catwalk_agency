@@ -8,15 +8,25 @@ const nav = [
 
 export function SiteHeader() {
   return (
-    <nav className="fixed left-0 right-0 top-0 z-50 bg-surface">
-      <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between px-6 py-6 md:px-12 md:py-8">
+    <nav className="fixed left-0 right-0 top-0 z-50 border-b-[0.5px] border-primary/10 bg-surface">
+      {/* Mobile header */}
+      <div className="flex w-full items-center justify-between px-6 py-4 md:hidden">
         <Link
           href="/"
-          className="font-headline text-2xl font-black uppercase tracking-tighter text-primary md:text-3xl"
+          className="font-headline text-2xl font-black uppercase tracking-tighter text-primary"
         >
           Catwalk
         </Link>
-        <div className="hidden items-center gap-8 md:flex md:gap-12">
+      </div>
+      {/* Desktop header */}
+      <div className="mx-auto hidden w-full max-w-[1440px] items-center justify-between px-12 py-8 md:flex">
+        <Link
+          href="/"
+          className="font-headline text-3xl font-black uppercase tracking-tighter text-primary"
+        >
+          Catwalk
+        </Link>
+        <div className="flex items-center gap-12">
           {nav.map((item) => (
             <Link
               key={item.href}
@@ -29,7 +39,7 @@ export function SiteHeader() {
         </div>
         <Link
           href="/login"
-          className="font-headline text-[0.6875rem] uppercase tracking-widest text-primary border-b border-primary pb-0.5 transition-opacity duration-100 hover:opacity-60 active:scale-95"
+          className="border-b border-primary pb-0.5 font-headline text-[0.6875rem] uppercase tracking-widest text-primary transition-opacity duration-100 hover:opacity-60 active:scale-95"
         >
           Model login
         </Link>

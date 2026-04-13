@@ -44,9 +44,29 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (user && (path === "/login" || path === "/register")) {
+    const { data: profile } = await supabase
+      .from("model_profiles")
+      .select("role")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    url.pathname = profile?.role === "admin" ? "/admin" : "/dashboard";
     return NextResponse.redirect(url);
+  }
+
+  if (user && path.startsWith("/admin")) {
+    const { data: profile } = await supabase
+      .from("model_profiles")
+      .select("role")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (profile?.role !== "admin") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard";
+      return NextResponse.redirect(url);
+    }
   }
 
   return supabaseResponse;

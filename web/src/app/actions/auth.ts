@@ -5,6 +5,17 @@ import { redirect } from "next/navigation";
 
 export type ActionState = { error?: string; message?: string };
 
+async function resolveRedirect(supabase: Awaited<ReturnType<typeof createClient>>, userId: string): Promise<string> {
+  const { data } = await supabase
+    .from("model_profiles")
+    .select("role")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (data?.role === "admin") return "/admin";
+  return "/dashboard";
+}
+
 export async function signIn(
   _prev: ActionState,
   formData: FormData,
@@ -16,12 +27,13 @@ export async function signIn(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
     return { error: error.message };
   }
 
-  redirect("/dashboard");
+  const dest = await resolveRedirect(supabase, authData.user.id);
+  redirect(dest);
 }
 
 export async function signUp(
