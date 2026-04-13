@@ -124,16 +124,16 @@ export function MinimalistHero({
           transition={{ duration: 0.8, ease: "easeOut", delay: 2.0 }}
           className="z-20 order-2 max-w-lg justify-self-center text-center md:order-1 md:max-w-lg md:justify-self-start md:text-left"
         >
-          {/* Brand name — large, impossible to miss */}
+          {/* Brand name */}
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut", delay: 1.6 }}
-            className="mb-6 font-headline text-5xl font-black uppercase leading-[0.85] tracking-tighter text-white sm:text-6xl md:mb-8 md:text-7xl lg:text-8xl"
+            className="mb-5 font-headline text-4xl font-black uppercase leading-[0.85] tracking-tighter text-white sm:text-5xl md:mb-6 md:text-5xl lg:text-6xl"
           >
             {logoText}
           </motion.h2>
-          <p className="mx-auto font-body text-sm leading-relaxed text-white/70 md:mx-0 md:text-base lg:text-lg">
+          <p className="mx-auto font-body text-xs leading-relaxed text-white/70 md:mx-0 md:text-sm lg:text-base">
             {mainText}
           </p>
           <Link
@@ -145,22 +145,22 @@ export function MinimalistHero({
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center md:justify-start">
             <Link
               href={applyHref}
-              className="inline-flex min-h-14 items-center justify-center bg-secondary px-10 py-4 text-center font-headline text-[0.75rem] font-bold uppercase tracking-widest text-white transition-colors hover:bg-tertiary"
+              className="inline-flex min-h-11 items-center justify-center bg-secondary px-7 py-3 text-center font-headline text-[0.625rem] font-bold uppercase tracking-widest text-white transition-colors hover:bg-tertiary"
             >
               {applyLabel}
             </Link>
             <Link
               href={loginHref}
-              className="inline-flex min-h-14 items-center justify-center border border-white/25 px-10 py-4 text-center font-headline text-[0.75rem] font-bold uppercase tracking-widest text-white/90 transition-colors hover:border-secondary hover:text-secondary"
+              className="inline-flex min-h-11 items-center justify-center border border-white/25 px-7 py-3 text-center font-headline text-[0.625rem] font-bold uppercase tracking-widest text-white/90 transition-colors hover:border-secondary hover:text-secondary"
             >
               {loginLabel}
             </Link>
           </div>
         </motion.div>
 
-        {/* Center — person emerges from below (scale on inner div so it does not fight motion transform) */}
-        <div className="relative order-1 flex min-h-[min(58vh,512px)] w-full items-end justify-center overflow-visible md:order-2 md:min-h-[min(66vh,720px)] lg:min-h-[min(68vh,768px)]">
-          {/* 1) Solid terracota circle — rises up first */}
+        {/* Center — person emerges from below */}
+        <div className="relative order-1 flex min-h-[min(54vh,480px)] w-full items-end justify-center overflow-visible md:order-2 md:min-h-[min(58vh,620px)] lg:min-h-[min(62vh,680px)]">
+          {/* 1) Solid terracota circle */}
           <motion.div
             initial={{ opacity: 0, y: 140, scale: 0.65 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -169,11 +169,11 @@ export function MinimalistHero({
               y: { type: "spring", stiffness: 64, damping: 22, delay: 0.45 },
               scale: { type: "spring", stiffness: 70, damping: 20, delay: 0.45 },
             }}
-            className="absolute bottom-[10%] z-0 aspect-square h-[min(72vw,336px)] rounded-full bg-secondary/35 md:bottom-[8%] md:h-[min(46vw,480px)] lg:bottom-[7%] lg:h-[min(42vw,540px)] xl:h-[min(38vw,580px)]"
+            className="absolute bottom-[4%] z-0 aspect-square h-[min(64vw,300px)] rounded-full bg-secondary/35 md:bottom-[2%] md:h-[min(38vw,400px)] lg:bottom-[1%] lg:h-[min(34vw,440px)] xl:h-[min(30vw,480px)]"
             aria-hidden
           />
 
-          {/* 2) Soft glow — follows the circle */}
+          {/* 2) Soft glow */}
           <motion.div
             initial={{ opacity: 0, y: 100 }}
             animate={{ opacity: 0.55, y: 0 }}
@@ -181,11 +181,11 @@ export function MinimalistHero({
               opacity: { duration: 1.2, ease: "easeOut", delay: 0.65 },
               y: { type: "spring", stiffness: 58, damping: 24, delay: 0.65 },
             }}
-            className="absolute bottom-[6%] z-0 aspect-square h-[min(82vw,400px)] rounded-full bg-secondary/25 blur-[72px] md:bottom-[4%] md:h-[min(54vw,580px)] lg:h-[min(48vw,640px)] xl:h-[min(44vw,680px)]"
+            className="absolute bottom-[1%] z-0 aspect-square h-[min(74vw,360px)] rounded-full bg-secondary/25 blur-[72px] md:bottom-0 md:h-[min(46vw,480px)] lg:h-[min(40vw,520px)] xl:h-[min(36vw,560px)]"
             aria-hidden
           />
 
-          {/* 3) Person — ~20% smaller than previous; spring in after circle */}
+          {/* 3) Person — positioned lower so head doesn't clip */}
           <motion.div
             initial={{ opacity: 0, y: "36%" }}
             animate={{ opacity: 1, y: 0 }}
@@ -199,15 +199,15 @@ export function MinimalistHero({
                 delay: 0.95,
               },
             }}
-            className="relative z-10 flex h-[min(70vh,544px)] w-full max-w-[min(88vw,480px)] items-end justify-center md:h-[min(69vh,656px)] md:max-w-none md:w-[min(100%,52vw)] lg:w-[min(100%,48vw)] xl:w-[min(100%,44vw)]"
+            className="relative z-10 flex h-[min(58vh,460px)] w-full max-w-[min(80vw,420px)] items-end justify-center md:h-[min(56vh,540px)] md:max-w-none md:w-[min(100%,42vw)] lg:w-[min(100%,38vw)] xl:w-[min(100%,34vw)]"
           >
-            <div className="relative h-[90%] w-full max-w-[min(88vw,640px)] origin-bottom scale-[1.24] md:max-w-[min(100%,720px)] md:scale-[1.56] lg:max-w-[min(100%,800px)] lg:scale-[1.8]">
+            <div className="relative h-[88%] w-full max-w-[min(80vw,540px)] origin-bottom scale-[1.1] md:max-w-[min(100%,600px)] md:scale-[1.3] lg:max-w-[min(100%,660px)] lg:scale-[1.45]">
               <Image
                 src={imageSrc}
                 alt={imageAlt}
                 fill
                 priority
-                sizes="(max-width: 768px) 88vw, (max-width: 1280px) 52vw, 800px"
+                sizes="(max-width: 768px) 80vw, (max-width: 1280px) 42vw, 660px"
                 className="object-contain object-bottom"
               />
             </div>
@@ -221,7 +221,7 @@ export function MinimalistHero({
           transition={{ duration: 0.8, ease: "easeOut", delay: 2.0 }}
           className="z-20 order-3 flex flex-col justify-center text-center md:justify-self-end md:items-end md:text-right"
         >
-          <h1 className="font-headline text-6xl font-black uppercase leading-[0.88] tracking-tighter sm:text-7xl md:text-8xl lg:text-9xl xl:text-[10rem]">
+          <h1 className="font-headline text-5xl font-black uppercase leading-[0.88] tracking-tighter sm:text-6xl md:text-6xl lg:text-7xl xl:text-8xl">
             <span className="block text-white">{overlayText.part1}</span>
             <span className="mt-1 block font-normal italic text-secondary">
               {overlayText.part2}

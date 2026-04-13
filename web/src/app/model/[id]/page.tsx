@@ -10,15 +10,7 @@ import type { ModelProfile } from "@/types/database";
 
 export const dynamic = "force-dynamic";
 
-const PORTFOLIO_IMAGES = [
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuB0JOjJyjXR3-VHhfS-RVb2XKwS-WfQQAvqIlCkHrbWvEMASOJXSNluUE6bYL-QDL3uHzsAjjeQSItM5lzofd9MJvqw58bljEqM5matjEqeX4NXERlfHEoHUJ4wq7JDRcq0XaNyqxmQ4kXagVxF1PAdKLl8P47T72vkfv2-NviFoMlrucA6PPpT-SxveiIqRFVTiKsdvxqgtLKiAjdCUaqFdTLEUTvbMd15PfgancUymFLqnSPG6flRwYgSltvMbpv08Ot7G-qoZQ",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuDZcFwQXgMIps5jx0_aR4Fr_zCypfq5MmdvJykLgtyz6WTV8zLVklDQ8YPJ87GF4yGGa6Um-MOXOmWekGSvJvlwMAlxYJdMEaHfIh7kA-LZIJ8I1F_DqnCOX95WH3ydJuCLdxL8oJdR49RAHoUEBax1z0sx-KxkMKk04_2tFPFWUIBbZ91_HZkxMOe7i0JJapnJsyE8VIEO5d2-MCzik2Iby6Hg2fjYBJ8cydrbFM0ujIEhvsUQp2aTYHmnI6vs0CwF-GfE3W3sAg",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuCMYJzAjFcs79lzhSYovclq1eZJ-ks_QhNUrKdGdt9CvQhMKkL51swRxLlotKb_zvwrtVRnh9LQH60wpJNl71JAl8okgz04YlrUUorPGVxjG-00IOiAYGfEjSpCv2UNXXg4vCVMzin7n2O3aYSjcIj3UBFcU9WM3NpY8LXOz2V-cpv5ydk8-NNnjFnvIWhARAuuBEA8fAYpdyBPJXExLWR0ISSHG7HxY9ESZOX3fGmEdDB7SSOHLSaGvZxgWeZjtUcLVNyFnzw9aQ",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuC6-4eoozlXUGPa36XNSxYP4ZnmTY8kjsq621LJcSSztsRBqLAS7BNYqlW3I2r0o3HjeQ6FefCcTjdwync1VPp6tccIAc2WZFXqXmOu3E5-GG69-c6YdExigZUkHzEMd1eKyiSpXqL4X1FJZBw_dbIUNOD7QTglwgeZjtqGfMKJN82I8vS7TVCnzNi4EkYaROwt69MESaPYUm5Jcdey4kcre6zIhOQQhVvSZmSiqKWsPHEanLbhn1lQZwrAU6c91inj6WtLlS4ToA",
-];
-
-const MAIN_PHOTO =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuDD0kR1Lze66LcS-BADWJz5CCPe7kzBgtPEztcVrJi6w2RvYgTitMB-vCeAdj1vd0mqBmGrueo4wvbp3fyduk9Wm8XZIWupJ-V-s--OIuq951Yioc9_9TAL2PSZyVE4TT9V73KbKXMxkdc9XCbSnVfH6A0n54IL1JzjCvgHR5kI8M1p_CSP4z0Wgf24Wx0oKkQ6RVhCZgUmHdQZOsAM-Krn6viZAvWzH5LtznsRlyjumiGvN9ADNXJjPCcYEBRNPCMNl-oeGv_bVw";
+const PLACEHOLDER_PHOTO = "/placeholder-model.svg";
 
 type Stat = { label: string; value: string };
 
@@ -68,7 +60,7 @@ export default async function ModelPortfolioPage({
     }
   }
 
-  const photo = m.foto_url ?? MAIN_PHOTO;
+  const photo = m.foto_url ?? PLACEHOLDER_PHOTO;
   const firstName = m.nombre.split(" ")[0];
   const lastName = m.nombre.split(" ").slice(1).join(" ");
 
@@ -160,10 +152,10 @@ export default async function ModelPortfolioPage({
           </div>
           <div className="col-span-12 pb-4 md:col-span-3">
             <Link
-              href={isClient ? "#booking" : "/login"}
+              href={isClient ? "#booking" : "/register"}
               className="block w-full bg-secondary py-6 px-8 text-center font-headline text-[0.75rem] font-bold uppercase tracking-widest text-on-secondary transition-colors duration-150 hover:bg-tertiary active:scale-95"
             >
-              {isClient ? "Book now" : "Sign in to book"}
+              {isClient ? "Book now" : "Register to book"}
             </Link>
           </div>
         </section>
@@ -194,69 +186,17 @@ export default async function ModelPortfolioPage({
           </div>
         </section>
 
-        {/* Mobile editorial gallery */}
-        <section className="mb-16 space-y-8 px-6 md:hidden">
-          <div className="grid grid-cols-12 items-end gap-4">
-            <div className="col-span-12">
-              <div className="relative aspect-square w-full overflow-hidden">
-                <Image src={PORTFOLIO_IMAGES[0]} alt="Editorial 1" fill sizes="100vw" className="object-cover" />
-              </div>
-              <p className="mt-3 font-label text-[10px] uppercase tracking-widest text-outline">Paris Collection — 2024</p>
-            </div>
-          </div>
-          <div className="bg-primary p-8 text-center md:p-24">
-            <h2 className="mb-6 font-headline text-3xl font-black uppercase italic leading-tight text-on-primary">
-              &ldquo;Fashion is the armor to survive the reality of everyday life.&rdquo;
-            </h2>
-            <div className="mx-auto h-px w-12 bg-secondary" />
-          </div>
-          <div className="grid grid-cols-12 items-start gap-4">
-            <div className="col-span-5">
-              <div className="relative aspect-[3/5] w-full overflow-hidden">
-                <Image src={PORTFOLIO_IMAGES[1]} alt="Editorial 2" fill sizes="40vw" className="object-cover" />
-              </div>
-            </div>
-            <div className="col-span-7">
-              <div className="relative aspect-video w-full overflow-hidden">
-                <Image src={PORTFOLIO_IMAGES[2]} alt="Editorial 3" fill sizes="60vw" className="object-cover" />
-              </div>
-              <p className="mt-3 text-right font-label text-[10px] uppercase tracking-widest text-outline">Vogue Italia / Digital</p>
-            </div>
-          </div>
-        </section>
-
-        {/* Desktop portfolio gallery */}
-        <section className="mb-64 hidden px-12 md:block">
-          <div className="grid grid-cols-12 gap-8 md:gap-16">
-            <div className="col-span-12 mb-32 md:col-span-8 md:col-start-3">
-              <div className="group relative aspect-video w-full overflow-hidden bg-surface-container-low">
-                <Image src={PORTFOLIO_IMAGES[0]} alt="Runway motion" fill sizes="80vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
-                <div className="absolute bottom-4 left-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                  <span className="bg-primary px-3 py-1 font-label text-[0.6875rem] uppercase tracking-widest text-on-primary">Vogue Editorial, 2024</span>
-                </div>
-              </div>
-            </div>
-            <div className="col-span-12 md:col-span-5 md:translate-y-24">
-              <div className="group relative aspect-[3/4] w-full overflow-hidden bg-surface-container-low">
-                <Image src={PORTFOLIO_IMAGES[1]} alt="Avant-garde" fill sizes="40vw" className="object-cover grayscale transition-all duration-500 hover:grayscale-0" />
-              </div>
-            </div>
-            <div className="col-span-12 md:col-span-6 md:col-start-7">
-              <div className="group relative aspect-[2/3] w-full overflow-hidden bg-surface-container-low">
-                <Image src={PORTFOLIO_IMAGES[2]} alt="Street editorial" fill sizes="50vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
-              </div>
-            </div>
-            <div className="col-span-12 mt-16 md:col-span-4 md:col-start-2 md:mt-48">
-              <div className="relative aspect-[3/5] w-full overflow-hidden bg-surface-container-low">
-                <Image src={PORTFOLIO_IMAGES[3]} alt="Shadow play" fill sizes="33vw" className="object-cover grayscale" />
-              </div>
-            </div>
-            <div className="col-span-12 self-center md:col-span-5 md:col-start-7">
-              <h3 className="mb-6 font-headline text-4xl font-bold uppercase leading-tight">Raw.<br />Unfiltered.<br />Timeless.</h3>
-              <p className="max-w-xs font-body text-sm uppercase leading-loose tracking-widest opacity-60">Captured exclusively for the &ldquo;Monolith&rdquo; series. Shot on 35mm film.</p>
-            </div>
-          </div>
-        </section>
+        {/* Mobile bio */}
+        {m.bio_profesional ? (
+          <section className="mb-12 px-6 md:hidden">
+            <h3 className="mb-3 font-headline text-xs font-bold uppercase tracking-widest text-secondary">
+              About
+            </h3>
+            <p className="font-body text-sm leading-relaxed text-on-surface/75">
+              {m.bio_profesional}
+            </p>
+          </section>
+        ) : null}
 
         {/* Mobile booking section */}
         <section
@@ -280,17 +220,18 @@ export default async function ModelPortfolioPage({
           ) : (
             <div className="flex flex-col items-center gap-4">
               <Link
-                href="/login"
+                href="/register"
                 className="w-full max-w-md bg-secondary py-6 text-center font-headline font-bold uppercase tracking-widest text-on-primary transition-colors duration-300 hover:bg-tertiary active:scale-[0.98]"
               >
-                Sign in to book
+                Register to book
               </Link>
               <p className="font-label text-[0.625rem] uppercase tracking-widest text-primary/40">
+                Already have an account?{" "}
                 <Link
-                  href="/register"
+                  href="/login"
                   className="text-secondary hover:underline"
                 >
-                  Register as a client
+                  Sign in
                 </Link>
               </p>
             </div>
@@ -316,21 +257,21 @@ export default async function ModelPortfolioPage({
           ) : (
             <div className="mx-auto max-w-md text-center">
               <p className="mb-8 font-body text-sm text-primary/60">
-                Sign in as a client to request a booking for this model.
+                Create an account as a client to request a booking for this model.
               </p>
               <Link
-                href="/login"
+                href="/register"
                 className="block w-full bg-secondary py-8 font-headline text-[0.875rem] font-bold uppercase tracking-widest text-on-secondary transition-all duration-300 hover:bg-tertiary"
               >
-                Sign in to book
+                Register to book
               </Link>
               <p className="mt-4 font-label text-[0.625rem] uppercase tracking-widest text-primary/40">
-                Don&apos;t have an account?{" "}
+                Already have an account?{" "}
                 <Link
-                  href="/register"
+                  href="/login"
                   className="text-secondary hover:underline"
                 >
-                  Register as a client
+                  Sign in
                 </Link>
               </p>
             </div>
@@ -340,7 +281,7 @@ export default async function ModelPortfolioPage({
         {/* Mobile floating booking button */}
         <div className="fixed bottom-20 right-6 z-40 md:hidden">
           <Link
-            href={isClient ? "#booking-mobile" : "/login"}
+            href={isClient ? "#booking-mobile" : "/register"}
             className="flex h-14 w-14 items-center justify-center bg-secondary text-on-primary shadow-lg active:scale-90 transition-transform"
           >
             <span className="material-symbols-outlined">mail</span>

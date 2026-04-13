@@ -26,7 +26,10 @@ export default async function Home() {
     models = [];
   }
 
-  const talent = models.filter((m) => m.role !== "admin");
+  const allTalent = models.filter((m) => m.role !== "admin" && m.role !== "client");
+  const featured = allTalent.filter((m) => m.featured);
+  const rest = allTalent.filter((m) => !m.featured);
+  const talent = [...featured, ...rest];
 
   return (
     <>

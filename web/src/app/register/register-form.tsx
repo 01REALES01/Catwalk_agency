@@ -62,6 +62,17 @@ export function RegisterForm() {
 
       <div className="space-y-6">
         <div className="space-y-2">
+          <Label htmlFor="nombre">Nombre completo</Label>
+          <Input
+            id="nombre"
+            name="nombre"
+            type="text"
+            autoComplete="name"
+            required
+            placeholder="Tu nombre"
+          />
+        </div>
+        <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"

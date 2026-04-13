@@ -48,6 +48,7 @@ export async function signUp(
 ): Promise<ActionState> {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
+  const nombre = String(formData.get("nombre") ?? "").trim();
   const role = (String(formData.get("role") ?? "model").trim() as UserRole);
 
   if (!email || !password) {
@@ -61,25 +62,42 @@ export async function signUp(
   const { data: authData, error } = await supabase.auth.signUp({
     email,
     password,
+    options: {
+      emailRedirectTo: undefined,
+      data: { role },
+    },
   });
   if (error) return { error: error.message };
 
-  if (authData.user) {
-    const profileData: Record<string, string> = {
-      user_id: authData.user.id,
-      nombre: email.split("@")[0],
-      role,
-    };
-
-    await supabase.from("model_profiles").upsert(profileData, {
-      onConflict: "user_id",
-    });
+  if (!authData.user) {
+    return { error: "No se pudo crear la cuenta. Intenta de nuevo." };
   }
 
-  return {
-    message:
-      "Cuenta creada. Revisa tu correo si la confirmación está activada, o inicia sesión directamente.",
+  const profileData: Record<string, string> = {
+    user_id: authData.user.id,
+    nombre: nombre || email.split("@")[0],
+    role,
   };
+
+  await supabase.from("model_profiles").upsert(profileData, {
+    onConflict: "user_id",
+  });
+
+  // Auto-login after registration
+  const { error: loginError } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (loginError) {
+    return {
+      message:
+        "Cuenta creada. Si necesitas confirmar tu email, revisa tu correo. Si no, inicia sesión.",
+    };
+  }
+
+  const dest = await resolveRedirect(supabase, authData.user.id);
+  redirect(dest);
 }
 
 export async function signOut() {
