@@ -85,6 +85,18 @@ CREATE POLICY "Admins update profiles"
     )
   );
 
+-- Public read access to model profiles (for directory and portfolio pages)
+-- Drop first in case a more restrictive policy exists
+DO $$ BEGIN
+  DROP POLICY IF EXISTS "Users read own profile" ON public.model_profiles;
+  DROP POLICY IF EXISTS "Public read profiles" ON public.model_profiles;
+EXCEPTION WHEN undefined_table THEN NULL;
+END $$;
+
+CREATE POLICY "Public read profiles"
+  ON public.model_profiles FOR SELECT
+  USING (true);
+
 -- 4) Updated_at trigger for bookings
 CREATE OR REPLACE FUNCTION public.set_updated_at()
 RETURNS TRIGGER AS $$

@@ -29,14 +29,14 @@ export default async function ModelPortfolioPage({
 }) {
   const { id } = await params;
   const supabase = await createClient();
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("model_profiles")
-    .select("*")
+    .select("user_id, nombre, altura, color_ojos, medidas, bio_profesional, foto_url, role")
     .eq("user_id", id)
     .maybeSingle();
 
-  if (!profile) notFound();
-  const m = profile as ModelProfile;
+  if (profileError || !profile) notFound();
+  const m = profile as Pick<ModelProfile, "user_id" | "nombre" | "altura" | "color_ojos" | "medidas" | "bio_profesional" | "foto_url" | "role">;
 
   const {
     data: { user },
