@@ -35,7 +35,11 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
 
-  const isProtected = path.startsWith("/dashboard") || path.startsWith("/admin");
+  const isProtected =
+    path.startsWith("/dashboard") ||
+    path.startsWith("/admin") ||
+    path.startsWith("/client");
+
   if (isProtected && !user) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
@@ -51,7 +55,9 @@ export async function updateSession(request: NextRequest) {
       .maybeSingle();
 
     const url = request.nextUrl.clone();
-    url.pathname = profile?.role === "admin" ? "/admin" : "/dashboard";
+    if (profile?.role === "admin") url.pathname = "/admin";
+    else if (profile?.role === "client") url.pathname = "/client";
+    else url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 
@@ -64,7 +70,7 @@ export async function updateSession(request: NextRequest) {
 
     if (profile?.role !== "admin") {
       const url = request.nextUrl.clone();
-      url.pathname = "/dashboard";
+      url.pathname = profile?.role === "client" ? "/client" : "/dashboard";
       return NextResponse.redirect(url);
     }
   }

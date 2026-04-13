@@ -1,6 +1,6 @@
 "use client";
 
-import { useFormState } from "react-dom";
+import { useActionState } from "react";
 import { upsertProfile, type ProfileActionState } from "@/app/actions/profile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import type { ModelProfile } from "@/types/database";
 const initial: ProfileActionState = {};
 
 export function ProfileForm({ profile }: { profile: ModelProfile | null }) {
-  const [state, formAction] = useFormState(upsertProfile, initial);
+  const [state, formAction] = useActionState(upsertProfile, initial);
 
   return (
     <form action={formAction} className="space-y-10">

@@ -2,10 +2,14 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import type { UserRole } from "@/types/database";
 
 export type ActionState = { error?: string; message?: string };
 
-async function resolveRedirect(supabase: Awaited<ReturnType<typeof createClient>>, userId: string): Promise<string> {
+async function resolveRedirect(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+): Promise<string> {
   const { data } = await supabase
     .from("model_profiles")
     .select("role")
@@ -13,6 +17,7 @@ async function resolveRedirect(supabase: Awaited<ReturnType<typeof createClient>
     .maybeSingle();
 
   if (data?.role === "admin") return "/admin";
+  if (data?.role === "client") return "/client";
   return "/dashboard";
 }
 
@@ -27,10 +32,11 @@ export async function signIn(
   }
 
   const supabase = await createClient();
-  const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) {
-    return { error: error.message };
-  }
+  const { data: authData, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+  if (error) return { error: error.message };
 
   const dest = await resolveRedirect(supabase, authData.user.id);
   redirect(dest);
@@ -42,6 +48,8 @@ export async function signUp(
 ): Promise<ActionState> {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
+  const role = (String(formData.get("role") ?? "model").trim() as UserRole);
+
   if (!email || !password) {
     return { error: "Email y contraseña son obligatorios." };
   }
@@ -50,14 +58,27 @@ export async function signUp(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({ email, password });
-  if (error) {
-    return { error: error.message };
+  const { data: authData, error } = await supabase.auth.signUp({
+    email,
+    password,
+  });
+  if (error) return { error: error.message };
+
+  if (authData.user) {
+    const profileData: Record<string, string> = {
+      user_id: authData.user.id,
+      nombre: email.split("@")[0],
+      role,
+    };
+
+    await supabase.from("model_profiles").upsert(profileData, {
+      onConflict: "user_id",
+    });
   }
 
   return {
     message:
-      "Revisa tu correo para confirmar la cuenta (si tienes confirmación activada en Supabase). Luego inicia sesión.",
+      "Cuenta creada. Revisa tu correo si la confirmación está activada, o inicia sesión directamente.",
   };
 }
 

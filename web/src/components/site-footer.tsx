@@ -1,18 +1,30 @@
 import Link from "next/link";
 
+const FOOTER_LINKS = {
+  navigate: [
+    { label: "Models", href: "/#roster" },
+    { label: "Register", href: "/register" },
+    { label: "Login", href: "/login" },
+  ],
+  connect: [
+    { label: "Instagram", href: "https://instagram.com" },
+    { label: "LinkedIn", href: "https://linkedin.com" },
+  ],
+};
+
 export function SiteFooter() {
   return (
     <footer>
       {/* Mobile footer */}
       <div className="flex flex-col items-center justify-center space-y-6 bg-primary px-6 py-12 text-center md:hidden">
         <div className="flex space-x-8">
-          {["Instagram", "Privacy", "Terms"].map((label) => (
+          {FOOTER_LINKS.navigate.map((link) => (
             <Link
-              key={label}
-              href="#"
+              key={link.label}
+              href={link.href}
               className="font-label text-[10px] uppercase tracking-[0.2em] text-surface/50 transition-colors hover:text-secondary"
             >
-              {label}
+              {link.label}
             </Link>
           ))}
         </div>
@@ -25,9 +37,12 @@ export function SiteFooter() {
       <div className="hidden bg-surface md:block">
         <div className="mx-auto mt-24 grid w-full max-w-[1440px] grid-cols-12 gap-8 bg-surface-container-low px-12 py-24">
           <div className="col-span-12 lg:col-span-4">
-            <div className="mb-8 font-headline text-2xl font-black uppercase tracking-tighter text-primary">
+            <Link
+              href="/"
+              className="mb-8 block font-headline text-2xl font-black uppercase tracking-tighter text-primary"
+            >
               Catwalk
-            </div>
+            </Link>
             <p className="font-label text-[0.6875rem] uppercase leading-relaxed tracking-[0.1em] text-primary opacity-40">
               &copy; {new Date().getFullYear()} Catwalk Agency. All rights
               reserved.
@@ -37,16 +52,16 @@ export function SiteFooter() {
           </div>
           <div className="col-span-6 lg:col-span-2 lg:col-start-7">
             <h5 className="mb-6 font-label text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-primary">
-              Information
+              Navigate
             </h5>
             <ul className="space-y-4">
-              {["Privacy", "Terms"].map((label) => (
-                <li key={label}>
+              {FOOTER_LINKS.navigate.map((link) => (
+                <li key={link.label}>
                   <Link
-                    href="#"
+                    href={link.href}
                     className="font-label text-[0.6875rem] uppercase tracking-[0.1em] text-primary opacity-40 transition-colors duration-150 hover:text-secondary"
                   >
-                    {label}
+                    {link.label}
                   </Link>
                 </li>
               ))}
@@ -57,14 +72,16 @@ export function SiteFooter() {
               Connect
             </h5>
             <ul className="space-y-4">
-              {["Instagram", "LinkedIn"].map((label) => (
-                <li key={label}>
-                  <Link
-                    href="#"
+              {FOOTER_LINKS.connect.map((link) => (
+                <li key={link.label}>
+                  <a
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="font-label text-[0.6875rem] uppercase tracking-[0.1em] text-primary opacity-40 transition-colors duration-150 hover:text-secondary"
                   >
-                    {label}
-                  </Link>
+                    {link.label}
+                  </a>
                 </li>
               ))}
             </ul>

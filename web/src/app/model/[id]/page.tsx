@@ -1,10 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { BookingForm } from "@/app/model/[id]/booking-form";
 import { MobileBottomNav } from "@/components/mobile-nav";
+import { PageBack } from "@/components/page-back";
 import { SiteFooter } from "@/components/site-footer";
 import { createClient } from "@/lib/supabase/server";
 import type { ModelProfile } from "@/types/database";
+
+export const dynamic = "force-dynamic";
 
 const PORTFOLIO_IMAGES = [
   "https://lh3.googleusercontent.com/aida-public/AB6AXuB0JOjJyjXR3-VHhfS-RVb2XKwS-WfQQAvqIlCkHrbWvEMASOJXSNluUE6bYL-QDL3uHzsAjjeQSItM5lzofd9MJvqw58bljEqM5matjEqeX4NXERlfHEoHUJ4wq7JDRcq0XaNyqxmQ4kXagVxF1PAdKLl8P47T72vkfv2-NviFoMlrucA6PPpT-SxveiIqRFVTiKsdvxqgtLKiAjdCUaqFdTLEUTvbMd15PfgancUymFLqnSPG6flRwYgSltvMbpv08Ot7G-qoZQ",
@@ -21,17 +25,34 @@ type Stat = { label: string; value: string };
 export default async function ModelPortfolioPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const supabase = await createClient();
   const { data: profile } = await supabase
     .from("model_profiles")
     .select("*")
-    .eq("user_id", params.id)
+    .eq("user_id", id)
     .maybeSingle();
 
   if (!profile) notFound();
   const m = profile as ModelProfile;
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let isClient = false;
+  let userEmail = "";
+  if (user) {
+    const { data: userProfile } = await supabase
+      .from("model_profiles")
+      .select("role")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    isClient = userProfile?.role === "client";
+    userEmail = user.email ?? "";
+  }
 
   const stats: Stat[] = [];
   if (m.altura) stats.push({ label: "Height", value: `${m.altura} cm` });
@@ -54,16 +75,33 @@ export default async function ModelPortfolioPage({
   return (
     <>
       {/* Mobile header */}
-      <header className="fixed left-0 right-0 top-0 z-50 flex w-full items-center justify-between border-b-[0.5px] border-primary/10 bg-surface px-6 py-4 md:hidden">
-        <Link href="/" className="font-headline text-2xl font-black uppercase tracking-tighter text-primary">
-          Catwalk
-        </Link>
+      <header className="fixed left-0 right-0 top-0 z-50 flex w-full items-center border-b-[0.5px] border-primary/10 bg-surface px-4 py-3 md:hidden">
+        <div className="relative flex w-full items-center justify-between gap-2">
+          <PageBack href="/#roster" label="Roster" className="shrink-0" />
+          <Link
+            href="/"
+            className="absolute left-1/2 min-w-0 max-w-[48%] -translate-x-1/2 truncate text-center font-headline text-lg font-black uppercase tracking-tighter text-primary"
+          >
+            Catwalk
+          </Link>
+          <Link
+            href="/login"
+            className="shrink-0 font-label text-[10px] font-semibold uppercase tracking-widest text-secondary"
+          >
+            Login
+          </Link>
+        </div>
       </header>
 
       {/* Desktop header */}
       <header className="fixed left-0 right-0 top-0 z-50 hidden bg-surface md:block">
-        <nav className="mx-auto flex w-full max-w-[1440px] items-center justify-between px-12 py-8">
-          <Link href="/" className="font-headline text-3xl font-black uppercase tracking-tighter text-primary">Catwalk</Link>
+        <nav className="mx-auto flex w-full max-w-[1440px] items-center justify-between gap-6 px-12 py-8">
+          <div className="flex min-w-0 items-center gap-4">
+            <PageBack href="/#roster" label="Roster" />
+            <Link href="/" className="truncate font-headline text-3xl font-black uppercase tracking-tighter text-primary">
+              Catwalk
+            </Link>
+          </div>
           <div className="flex items-center gap-12">
             <Link href="/#roster" className="border-b-2 border-secondary pb-1 font-headline text-[0.6875rem] uppercase tracking-widest text-secondary">Models</Link>
             <Link href="/#philosophy" className="font-headline text-[0.6875rem] uppercase tracking-widest text-primary opacity-60 transition-opacity duration-150 hover:opacity-100">Philosophy</Link>
@@ -121,8 +159,11 @@ export default async function ModelPortfolioPage({
             </div>
           </div>
           <div className="col-span-12 pb-4 md:col-span-3">
-            <Link href="/login" className="block w-full bg-secondary py-6 px-8 text-center font-headline text-[0.75rem] font-bold uppercase tracking-widest text-on-secondary transition-colors duration-150 hover:bg-tertiary active:scale-95">
-              Request booking
+            <Link
+              href={isClient ? "#booking" : "/login"}
+              className="block w-full bg-secondary py-6 px-8 text-center font-headline text-[0.75rem] font-bold uppercase tracking-widest text-on-secondary transition-colors duration-150 hover:bg-tertiary active:scale-95"
+            >
+              {isClient ? "Book now" : "Sign in to book"}
             </Link>
           </div>
         </section>
@@ -217,47 +258,90 @@ export default async function ModelPortfolioPage({
           </div>
         </section>
 
-        {/* Mobile CTA */}
-        <section className="flex flex-col items-center justify-center space-y-8 px-6 pb-8 md:hidden">
-          <div className="space-y-4 text-center">
-            <h3 className="font-headline text-4xl font-black uppercase tracking-tighter">Secure availability</h3>
+        {/* Mobile booking section */}
+        <section
+          id="booking-mobile"
+          className="px-6 pb-8 md:hidden"
+        >
+          <div className="mb-8 space-y-4 text-center">
+            <h3 className="font-headline text-4xl font-black uppercase tracking-tighter">
+              Book {firstName}
+            </h3>
             <p className="mx-auto max-w-xs font-label text-sm text-outline">
               Currently accepting bookings for New York and Milan Fashion Week.
             </p>
           </div>
-          <Link
-            href="/login"
-            className="w-full max-w-md bg-secondary py-6 text-center font-headline font-bold uppercase tracking-widest text-on-primary transition-colors duration-300 hover:bg-tertiary active:scale-[0.98]"
-          >
-            Request booking
-          </Link>
-          <div className="flex space-x-8">
-            <span className="border-b border-primary/10 pb-1 font-label text-[10px] uppercase tracking-widest">Portfolio PDF</span>
-            <span className="border-b border-primary/10 pb-1 font-label text-[10px] uppercase tracking-widest">Comp Card</span>
-          </div>
+          {isClient ? (
+            <BookingForm
+              modelId={id}
+              modelName={m.nombre}
+              clientEmail={userEmail}
+            />
+          ) : (
+            <div className="flex flex-col items-center gap-4">
+              <Link
+                href="/login"
+                className="w-full max-w-md bg-secondary py-6 text-center font-headline font-bold uppercase tracking-widest text-on-primary transition-colors duration-300 hover:bg-tertiary active:scale-[0.98]"
+              >
+                Sign in to book
+              </Link>
+              <p className="font-label text-[0.625rem] uppercase tracking-widest text-primary/40">
+                <Link
+                  href="/register"
+                  className="text-secondary hover:underline"
+                >
+                  Register as a client
+                </Link>
+              </p>
+            </div>
+          )}
         </section>
 
-        {/* Desktop booking CTA */}
-        <section className="hidden bg-primary px-12 py-32 text-center md:block">
-          <h2 className="mb-12 font-headline text-7xl font-black uppercase tracking-tighter text-on-primary lg:text-8xl">
+        {/* Desktop booking section */}
+        <section
+          id="booking"
+          className="hidden px-12 py-32 md:block"
+        >
+          <h2 className="mb-12 text-center font-headline text-7xl font-black uppercase tracking-tighter text-primary lg:text-8xl">
             Book {firstName}
           </h2>
-          <div className="mx-auto max-w-md">
-            <Link href="/login" className="block w-full bg-secondary py-8 font-headline text-[0.875rem] font-bold uppercase tracking-widest text-on-secondary transition-all duration-300 hover:bg-tertiary">
-              Send booking inquiry
-            </Link>
-            <div className="mt-8 flex justify-center gap-8">
-              <span className="font-label text-[0.6875rem] uppercase tracking-widest text-on-primary/40">Comp Card PDF</span>
-              <span className="font-label text-[0.6875rem] uppercase tracking-widest text-on-primary/40">Portfolio Zip</span>
+          {isClient ? (
+            <div className="mx-auto max-w-2xl">
+              <BookingForm
+                modelId={id}
+                modelName={m.nombre}
+                clientEmail={userEmail}
+              />
             </div>
-          </div>
+          ) : (
+            <div className="mx-auto max-w-md text-center">
+              <p className="mb-8 font-body text-sm text-primary/60">
+                Sign in as a client to request a booking for this model.
+              </p>
+              <Link
+                href="/login"
+                className="block w-full bg-secondary py-8 font-headline text-[0.875rem] font-bold uppercase tracking-widest text-on-secondary transition-all duration-300 hover:bg-tertiary"
+              >
+                Sign in to book
+              </Link>
+              <p className="mt-4 font-label text-[0.625rem] uppercase tracking-widest text-primary/40">
+                Don&apos;t have an account?{" "}
+                <Link
+                  href="/register"
+                  className="text-secondary hover:underline"
+                >
+                  Register as a client
+                </Link>
+              </p>
+            </div>
+          )}
         </section>
 
         {/* Mobile floating booking button */}
         <div className="fixed bottom-20 right-6 z-40 md:hidden">
           <Link
-            href="/login"
-            className="flex h-14 w-14 items-center justify-center bg-secondary text-on-primary active:scale-90 transition-transform"
+            href={isClient ? "#booking-mobile" : "/login"}
+            className="flex h-14 w-14 items-center justify-center bg-secondary text-on-primary shadow-lg active:scale-90 transition-transform"
           >
             <span className="material-symbols-outlined">mail</span>
           </Link>

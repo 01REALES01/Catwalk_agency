@@ -13,13 +13,22 @@ const TEST_USERS = [
   {
     email: "admin@catwalk.agency",
     password: "Admin1234!",
-    profile: null,
+    profile: {
+      nombre: "HQ Admin",
+      role: "admin",
+      altura: null,
+      color_ojos: null,
+      medidas: null,
+      bio_profesional: null,
+      foto_url: null,
+    },
   },
   {
     email: "elara.vane@catwalk.agency",
     password: "Model1234!",
     profile: {
       nombre: "Elara Vane",
+      role: "model",
       altura: 180,
       color_ojos: "Esmeralda",
       medidas: "82-60-88",
@@ -34,6 +43,7 @@ const TEST_USERS = [
     password: "Model1234!",
     profile: {
       nombre: "Caspian Kroh",
+      role: "model",
       altura: 188,
       color_ojos: "Gris",
       medidas: "100-80-95",
@@ -48,6 +58,7 @@ const TEST_USERS = [
     password: "Model1234!",
     profile: {
       nombre: "Juno Sato",
+      role: "model",
       altura: 175,
       color_ojos: "Marrón oscuro",
       medidas: "80-58-86",
@@ -62,6 +73,7 @@ const TEST_USERS = [
     password: "Model1234!",
     profile: {
       nombre: "Alessia Moretti",
+      role: "model",
       altura: 177,
       color_ojos: "Avellana",
       medidas: "84-62-90",

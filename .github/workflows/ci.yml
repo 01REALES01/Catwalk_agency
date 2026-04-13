@@ -2,7 +2,6 @@
 # Añade en GitHub → Settings → Secrets and variables → Actions:
 #   NEXT_PUBLIC_SUPABASE_URL
 #   NEXT_PUBLIC_SUPABASE_ANON_KEY
-# (mismos valores que en Vercel → Environment Variables)
 
 name: CI
 
@@ -24,7 +23,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: npm
           cache-dependency-path: web/package-lock.json
 
@@ -32,12 +31,11 @@ jobs:
         run: npm ci
 
       - name: Lint
-        run: npm run lint
+        run: npx eslint src/
 
       - name: Build
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          # OpenAI solo hace falta si el build evalúa rutas API; por si acaso:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: npm run build
+        run: npx next build
