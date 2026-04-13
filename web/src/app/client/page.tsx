@@ -1,10 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { signOut } from "@/app/actions/auth";
 import { MobileBottomNav } from "@/components/mobile-nav";
-import { PageBack } from "@/components/page-back";
 import { SiteFooter } from "@/components/site-footer";
-import { Button } from "@/components/ui/button";
+import { SiteHeader } from "@/components/site-header";
 import { createClient } from "@/lib/supabase/server";
 import type { Booking } from "@/types/database";
 
@@ -66,57 +64,9 @@ export default async function ClientDashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Mobile top bar */}
-      <header className="sticky top-0 z-50 border-b-[0.5px] border-primary/10 bg-surface px-4 py-3 md:hidden">
-        <div className="relative flex w-full items-center justify-between gap-2">
-          <PageBack href="/" label="Inicio" className="shrink-0" />
-          <Link
-            href="/"
-            className="absolute left-1/2 min-w-0 max-w-[45%] -translate-x-1/2 truncate text-center font-headline text-lg font-black uppercase tracking-tighter text-primary"
-          >
-            Catwalk
-          </Link>
-          <form action={signOut} className="shrink-0">
-            <button
-              type="submit"
-              className="material-symbols-outlined flex h-11 w-11 items-center justify-center text-primary/60"
-              aria-label="Cerrar sesión"
-            >
-              logout
-            </button>
-          </form>
-        </div>
-      </header>
+      <SiteHeader role="client" />
 
-      {/* Desktop nav */}
-      <nav className="fixed left-0 right-0 top-0 z-50 hidden bg-surface md:block">
-        <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-6 px-12 py-6">
-          <div className="flex items-center gap-4">
-            <PageBack href="/" label="Inicio" />
-            <Link
-              href="/"
-              className="font-headline text-2xl font-black uppercase tracking-tighter text-primary"
-            >
-              Catwalk
-            </Link>
-          </div>
-          <div className="flex items-center gap-6">
-            <Link
-              href="/#roster"
-              className="font-headline text-[0.6875rem] uppercase tracking-widest text-primary opacity-60 transition-opacity hover:opacity-100"
-            >
-              Browse Models
-            </Link>
-            <form action={signOut}>
-              <Button type="submit" variant="outline" size="sm">
-                Salir
-              </Button>
-            </form>
-          </div>
-        </div>
-      </nav>
-
-      <main className="mx-auto max-w-[1440px] px-6 pb-24 pt-6 md:px-12 md:pb-32 md:pt-40">
+      <main className="mx-auto max-w-[1440px] px-6 pb-24 pt-20 md:px-12 md:pb-32 md:pt-40">
         {/* Welcome */}
         <header className="mb-12 md:mb-24">
           <p className="mb-2 font-label text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-secondary md:mb-4">
@@ -219,6 +169,10 @@ export default async function ClientDashboard() {
                         ) : null}
                         {b.event_location ? (
                           <span>{b.event_location}</span>
+                        ) : null}
+                        {b.hours ? <span>{b.hours}h</span> : null}
+                        {b.budget ? (
+                          <span className="font-bold text-secondary">${b.budget.toLocaleString("en-US")}</span>
                         ) : null}
                       </div>
                       {b.message ? (

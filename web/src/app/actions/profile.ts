@@ -36,6 +36,13 @@ export async function upsertProfile(
   const bio_profesional =
     String(formData.get("bio_profesional") ?? "").trim() || null;
 
+  const tarifaRaw = String(formData.get("tarifa_hora") ?? "").trim();
+  const tarifa_hora =
+    tarifaRaw === "" ? null : Number.parseFloat(tarifaRaw.replace(",", "."));
+  if (tarifaRaw !== "" && (Number.isNaN(tarifa_hora!) || tarifa_hora! < 0)) {
+    return { error: "Tarifa inválida (usa números, ej. 150)." };
+  }
+
   const { error } = await supabase.from("model_profiles").upsert(
     {
       user_id: user.id,
@@ -44,6 +51,7 @@ export async function upsertProfile(
       color_ojos,
       medidas,
       bio_profesional,
+      tarifa_hora,
     },
     { onConflict: "user_id" },
   );

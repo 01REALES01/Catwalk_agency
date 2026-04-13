@@ -8,6 +8,7 @@ export type ModelProfile = {
   medidas: string | null;
   bio_profesional: string | null;
   foto_url: string | null;
+  tarifa_hora: number | null;
   role?: UserRole;
   approved: boolean;
   featured: boolean;
@@ -31,13 +32,14 @@ export type Booking = {
   event_type: string;
   event_date: string | null;
   event_location: string | null;
+  hours: number | null;
+  budget: number | null;
   message: string | null;
   status: BookingStatus;
   admin_notes: string | null;
   created_at: string;
   updated_at: string;
-  /** Joined from model_profiles when needed */
-  model_profiles?: Pick<ModelProfile, "nombre" | "foto_url"> | null;
+  model_profiles?: Pick<ModelProfile, "nombre" | "foto_url" | "tarifa_hora"> | null;
 };
 
 export type AppUser = {

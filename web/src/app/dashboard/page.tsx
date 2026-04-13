@@ -1,19 +1,23 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { signOut } from "@/app/actions/auth";
 import { GenerateBioButton } from "@/app/dashboard/generate-bio-button";
+import { ModelBookings } from "@/app/dashboard/model-bookings";
 import { PhotoUpload } from "@/app/dashboard/photo-upload";
 import { ProfileForm } from "@/app/dashboard/profile-form";
 import { MobileBottomNav } from "@/components/mobile-nav";
-import { PageBack } from "@/components/page-back";
 import { SiteFooter } from "@/components/site-footer";
-import { Button } from "@/components/ui/button";
+import { SiteHeader } from "@/components/site-header";
 import { createClient } from "@/lib/supabase/server";
 import type { Booking, ModelProfile } from "@/types/database";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = { title: "Dashboard — Catwalk" };
+
+function formatMoney(n: number | null) {
+  if (n == null) return "—";
+  return `$${n.toLocaleString("en-US", { minimumFractionDigits: 0 })}`;
+}
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -40,323 +44,168 @@ export default async function DashboardPage() {
     .order("created_at", { ascending: false });
 
   const bookings = (bookingsRaw as Booking[]) ?? [];
-  const pendingBookings = bookings.filter(
-    (b) => b.status === "pending",
-  ).length;
-  const confirmedBookings = bookings.filter(
-    (b) => b.status === "confirmed",
-  ).length;
+  const pendingBookings = bookings.filter((b) => b.status === "pending").length;
+  const confirmedBookings = bookings.filter((b) => b.status === "confirmed").length;
 
   const profileComplete =
     !!p?.nombre && p.altura != null && !!p.color_ojos && !!p.medidas;
 
   return (
     <div className="min-h-screen bg-background">
-      {/* ── Top bar (mobile) ── */}
-      <header className="sticky top-0 z-50 border-b-[0.5px] border-primary/10 bg-surface px-4 py-3 md:hidden">
-        <div className="relative flex w-full items-center justify-between gap-2">
-          <PageBack href="/" label="Inicio" className="shrink-0" />
-          <Link
-            href="/"
-            className="absolute left-1/2 min-w-0 max-w-[45%] -translate-x-1/2 truncate text-center font-headline text-lg font-black uppercase tracking-tighter text-primary"
-          >
-            Catwalk
-          </Link>
-          <form action={signOut} className="shrink-0">
-            <button
-              type="submit"
-              className="material-symbols-outlined flex h-11 w-11 items-center justify-center text-primary/60"
-              aria-label="Cerrar sesión"
-            >
-              logout
-            </button>
-          </form>
-        </div>
-      </header>
+      <SiteHeader role="model" />
 
-      {/* ── Top bar (desktop) ── */}
-      <nav className="fixed left-0 right-0 top-0 z-50 hidden bg-surface md:block">
-        <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-6 px-12 py-6">
-          <div className="flex items-center gap-4">
-            <PageBack href="/" label="Inicio" />
-            <Link
-              href="/"
-              className="font-headline text-2xl font-black uppercase tracking-tighter text-primary"
-            >
-              Catwalk
-            </Link>
-          </div>
-          <div className="flex items-center gap-6">
-            <Link
-              href={`/model/${user.id}`}
-              className="font-headline text-[0.6875rem] uppercase tracking-widest text-primary opacity-60 transition-opacity hover:opacity-100"
-            >
-              My Portfolio
-            </Link>
-            <Link
-              href="/#roster"
-              className="font-headline text-[0.6875rem] uppercase tracking-widest text-primary opacity-60 transition-opacity hover:opacity-100"
-            >
-              Roster
-            </Link>
-            <form action={signOut}>
-              <Button type="submit" variant="outline" size="sm">
-                Salir
-              </Button>
-            </form>
-          </div>
-        </div>
-      </nav>
-
-      <main className="mx-auto max-w-[1440px] px-5 pb-24 pt-4 md:px-12 md:pb-32 md:pt-40">
-        {/* ════════════════════════════════════════════════
-            1. WELCOME + STATS
-        ════════════════════════════════════════════════ */}
-        <section className="mb-10 md:mb-24">
+      <main className="mx-auto max-w-[1440px] px-5 pb-24 pt-20 md:px-12 md:pb-32 md:pt-40">
+        {/* Welcome + Stats */}
+        <section className="mb-10 md:mb-20">
           <p className="mb-1 font-label text-[10px] font-bold uppercase tracking-[0.2em] text-secondary md:mb-4 md:text-[0.6875rem]">
             Model dashboard
           </p>
           <h1 className="mb-8 font-headline text-4xl font-black uppercase leading-none tracking-tighter md:mb-12 md:text-7xl">
-            Welcome back,
-            <br />
-            {displayName}.
+            {displayName}
           </h1>
 
-          {/* Stats — 4 on mobile, 4 on desktop, all centered */}
-          <div className="grid grid-cols-2 gap-[2px] bg-primary md:grid-cols-4 md:gap-4 md:bg-transparent">
-            {[
-              {
-                label: "Status",
-                value: p?.approved ? "Approved" : "Pending",
-                accent: false,
-              },
-              {
-                label: "Bookings",
-                value: String(bookings.length),
-                accent: false,
-              },
-              {
-                label: "Pending",
-                value: String(pendingBookings),
-                accent: true,
-              },
-              {
-                label: "Confirmed",
-                value: String(confirmedBookings),
-                accent: false,
-                dark: true,
-              },
-            ].map((s) => (
-              <div
-                key={s.label}
-                className={`flex flex-col gap-1 p-6 md:p-8 ${
-                  s.dark
-                    ? "bg-primary text-on-primary"
-                    : "bg-surface md:bg-surface-container-low"
-                }`}
-              >
-                <span
-                  className={`font-label text-[9px] uppercase tracking-widest md:text-[0.625rem] ${
-                    s.dark ? "text-on-primary/50" : "text-primary/45"
-                  }`}
-                >
-                  {s.label}
-                </span>
-                <span
-                  className={`font-headline text-2xl font-bold uppercase italic md:text-4xl ${
-                    s.accent ? "text-secondary" : ""
-                  }`}
-                >
-                  {s.value}
-                </span>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ════════════════════════════════════════════════
-            2. AI BIOGRAPHY — prominent, before the form
-        ════════════════════════════════════════════════ */}
-        <section className="mb-10 md:mb-24">
-          <div className="mb-6 flex items-center justify-between md:mb-8">
-            <h2 className="font-headline text-xl font-black uppercase tracking-tighter md:text-4xl">
-              AI Biography
-            </h2>
-            <span className="flex items-center gap-1.5 font-label text-[9px] uppercase tracking-widest text-secondary md:text-[0.625rem]">
-              <span className="material-symbols-outlined text-base">
-                auto_awesome
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-5 md:gap-4">
+            <div className="flex flex-col gap-1 bg-surface-container-low p-5 md:p-8">
+              <span className="font-label text-[0.5rem] uppercase tracking-widest text-primary/40 md:text-[0.625rem]">Status</span>
+              <span className="font-headline text-xl font-bold uppercase md:text-3xl">
+                {p?.approved ? "Approved" : "Pending"}
               </span>
-              OpenAI
-            </span>
-          </div>
-
-          {/* Current bio (if any) */}
-          {p?.bio_profesional ? (
-            <div className="mb-6 border-l-2 border-secondary pl-5 md:mb-8 md:pl-8">
-              <p className="font-body text-sm leading-relaxed text-on-surface/80 md:text-base">
-                {p.bio_profesional}
-              </p>
             </div>
-          ) : (
-            <div className="mb-6 flex flex-col items-center gap-3 border border-dashed border-outline-variant/30 py-10 text-center md:mb-8 md:py-16">
-              <span className="material-symbols-outlined text-4xl text-primary/15">
-                edit_note
+            <div className={`flex flex-col gap-1 p-5 md:p-8 ${pendingBookings > 0 ? "bg-yellow-500/10" : "bg-surface-container-low"}`}>
+              <span className="font-label text-[0.5rem] uppercase tracking-widest text-primary/40 md:text-[0.625rem]">Pending</span>
+              <span className={`font-headline text-xl font-bold md:text-3xl ${pendingBookings > 0 ? "text-yellow-700" : ""}`}>
+                {pendingBookings}
               </span>
-              <p className="max-w-xs font-body text-sm text-primary/40">
-                {profileComplete
-                  ? "Generate your professional biography with one click using AI."
-                  : "Complete your measurements first, then generate your bio with AI."}
-              </p>
             </div>
-          )}
-
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
-            <GenerateBioButton />
-            <p className="font-label text-[9px] uppercase tracking-widest text-primary/30 md:text-[0.5625rem]">
-              {p?.bio_profesional
-                ? "Click to regenerate with your latest profile data."
-                : "Generates a professional bio based on your measurements."}
-            </p>
-          </div>
-        </section>
-
-        {/* ════════════════════════════════════════════════
-            3. PROFILE PHOTO + MEASUREMENTS FORM
-        ════════════════════════════════════════════════ */}
-        <section className="mb-10 md:mb-24">
-          <div className="mb-6 flex items-baseline justify-between md:mb-8">
-            <h2 className="font-headline text-xl font-black uppercase tracking-tighter md:text-4xl">
-              Profile
-            </h2>
-            <span className="font-label text-[9px] uppercase italic tracking-widest text-primary/35 md:text-[0.5625rem]">
-              {profileComplete ? "Profile complete" : "Please complete"}
-            </span>
-          </div>
-
-          {/* Photo upload */}
-          <div className="mb-10 md:mb-12">
-            <p className="mb-4 font-label text-[0.5625rem] uppercase tracking-widest text-primary/45 md:text-[0.625rem]">
-              Profile photo
-            </p>
-            <PhotoUpload userId={user.id} currentUrl={p?.foto_url ?? null} />
-          </div>
-
-          {/* Measurements form */}
-          <div>
-            <p className="mb-4 font-label text-[0.5625rem] uppercase tracking-widest text-primary/45 md:text-[0.625rem]">
-              Measurements &amp; info
-            </p>
-            <div className="max-w-3xl">
-              <ProfileForm profile={p} />
+            <div className="flex flex-col gap-1 bg-green-600/5 p-5 md:p-8">
+              <span className="font-label text-[0.5rem] uppercase tracking-widest text-primary/40 md:text-[0.625rem]">Confirmed</span>
+              <span className="font-headline text-xl font-bold text-green-700 md:text-3xl">
+                {confirmedBookings}
+              </span>
+            </div>
+            <div className="flex flex-col gap-1 bg-surface-container-low p-5 md:p-8">
+              <span className="font-label text-[0.5rem] uppercase tracking-widest text-primary/40 md:text-[0.625rem]">Total</span>
+              <span className="font-headline text-xl font-bold md:text-3xl">
+                {bookings.length}
+              </span>
+            </div>
+            <div className="col-span-2 flex flex-col gap-1 bg-primary p-5 text-on-primary md:col-span-1 md:p-8">
+              <span className="font-label text-[0.5rem] uppercase tracking-widest text-on-primary/50 md:text-[0.625rem]">Rate/hr</span>
+              <span className="font-headline text-xl font-bold md:text-3xl">
+                {formatMoney(p?.tarifa_hora ?? null)}
+              </span>
             </div>
           </div>
         </section>
 
-        {/* ════════════════════════════════════════════════
-            4. BOOKINGS LIST
-        ════════════════════════════════════════════════ */}
+        {/* Bookings — most important section */}
         <section className="mb-10 md:mb-24">
           <div className="mb-6 flex items-baseline justify-between md:mb-8">
             <h2 className="font-headline text-xl font-black uppercase tracking-tighter md:text-4xl">
               Bookings
             </h2>
-            {bookings.length > 0 ? (
+            {pendingBookings > 0 ? (
+              <span className="bg-yellow-500/10 px-3 py-1 font-label text-[0.5625rem] uppercase tracking-widest text-yellow-700">
+                {pendingBookings} need response
+              </span>
+            ) : (
               <span className="font-label text-[9px] uppercase tracking-widest text-primary/35 md:text-[0.5625rem]">
                 {bookings.length} total
               </span>
-            ) : null}
+            )}
           </div>
 
-          {bookings.length === 0 ? (
-            <div className="flex flex-col items-center gap-4 border border-dashed border-outline-variant/30 py-12 text-center md:py-20">
-              <span className="material-symbols-outlined text-5xl text-primary/15">
-                event_available
-              </span>
-              <p className="max-w-xs font-body text-sm text-primary/40">
-                No booking requests yet. Once clients find your profile,
-                their requests will appear here.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {bookings.map((b) => {
-                const stColor =
-                  b.status === "confirmed"
-                    ? "bg-green-600/10 text-green-700"
-                    : b.status === "pending"
-                      ? "bg-yellow-500/10 text-yellow-700"
-                      : b.status === "declined"
-                        ? "bg-red-500/10 text-red-600"
-                        : "bg-outline-variant/20 text-primary/50";
-                return (
-                  <div
-                    key={b.id}
-                    className="flex flex-col gap-3 border border-outline-variant/15 p-5 md:flex-row md:items-center md:justify-between md:p-8"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="mb-1 flex flex-wrap items-center gap-2">
-                        <span className="font-headline text-sm font-bold uppercase tracking-tight">
-                          {b.client_name}
-                        </span>
-                        <span
-                          className={`shrink-0 px-2 py-0.5 font-label text-[0.5rem] uppercase tracking-widest ${stColor}`}
-                        >
-                          {b.status}
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap gap-x-3 gap-y-0.5 font-label text-[0.5625rem] uppercase tracking-widest text-primary/40">
-                        <span>{b.event_type}</span>
-                        {b.event_date ? (
-                          <span>
-                            {new Date(b.event_date).toLocaleDateString()}
-                          </span>
-                        ) : null}
-                        {b.event_location ? (
-                          <span>{b.event_location}</span>
-                        ) : null}
-                      </div>
-                      {b.message ? (
-                        <p className="mt-2 line-clamp-2 font-body text-xs text-primary/50">
-                          {b.message}
-                        </p>
-                      ) : null}
-                    </div>
-                    <span className="shrink-0 font-label text-[0.5rem] uppercase tracking-widest text-primary/25">
-                      {new Date(b.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+          <ModelBookings bookings={bookings} />
         </section>
 
-        {/* ════════════════════════════════════════════════
-            5. PUBLIC PROFILE LINK
-        ════════════════════════════════════════════════ */}
-        <div className="flex flex-col items-center justify-between gap-4 bg-surface-container-highest p-5 md:flex-row md:gap-6 md:p-8">
-          <div className="flex items-center gap-4 md:gap-6">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center bg-secondary text-on-primary md:h-12 md:w-12">
-              <span className="material-symbols-outlined text-sm md:text-lg">
-                visibility
-              </span>
+        {/* Profile overview + Edit button */}
+        <section className="mb-10 md:mb-24">
+          <div className="mb-6 flex items-baseline justify-between md:mb-8">
+            <h2 className="font-headline text-xl font-black uppercase tracking-tighter md:text-4xl">
+              My Profile
+            </h2>
+            <span className="font-label text-[9px] uppercase italic tracking-widest text-primary/35 md:text-[0.5625rem]">
+              {profileComplete ? "Complete" : "Incomplete"}
+            </span>
+          </div>
+
+          {/* Profile summary card */}
+          <div className="mb-6 grid grid-cols-1 gap-6 border border-outline-variant/15 p-5 md:grid-cols-[140px_1fr] md:p-8">
+            {/* Photo */}
+            <div className="relative mx-auto aspect-[3/4] w-full max-w-[140px] overflow-hidden bg-surface-container-high md:mx-0">
+              {p?.foto_url ? (
+                <img src={p.foto_url} alt={p.nombre} className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full w-full flex-col items-center justify-center gap-1 text-primary/15">
+                  <span className="material-symbols-outlined text-3xl">person</span>
+                  <span className="font-label text-[0.5rem] uppercase tracking-widest">No photo</span>
+                </div>
+              )}
             </div>
-            <div>
-              <h4 className="font-headline text-xs font-black uppercase tracking-wider md:text-sm">
-                Your public profile
-              </h4>
-              <p className="font-body text-[10px] text-primary/50 md:text-xs">
-                See how clients view your portfolio page.
-              </p>
+
+            {/* Info */}
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div>
+                  <p className="font-label text-[0.5rem] uppercase tracking-widest opacity-35">Name</p>
+                  <p className="mt-0.5 font-headline text-sm font-bold">{p?.nombre ?? "—"}</p>
+                </div>
+                <div>
+                  <p className="font-label text-[0.5rem] uppercase tracking-widest opacity-35">Height</p>
+                  <p className="mt-0.5 font-headline text-sm font-bold">{p?.altura ? `${p.altura} cm` : "—"}</p>
+                </div>
+                <div>
+                  <p className="font-label text-[0.5rem] uppercase tracking-widest opacity-35">Eyes</p>
+                  <p className="mt-0.5 font-headline text-sm font-bold">{p?.color_ojos ?? "—"}</p>
+                </div>
+                <div>
+                  <p className="font-label text-[0.5rem] uppercase tracking-widest opacity-35">Measurements</p>
+                  <p className="mt-0.5 font-headline text-sm font-bold">{p?.medidas ?? "—"}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div>
+                  <p className="font-label text-[0.5rem] uppercase tracking-widest opacity-35">Rate / hour</p>
+                  <p className="mt-0.5 font-headline text-sm font-bold text-secondary">{formatMoney(p?.tarifa_hora ?? null)}</p>
+                </div>
+                <div className="col-span-1 sm:col-span-3">
+                  <p className="font-label text-[0.5rem] uppercase tracking-widest opacity-35">Bio</p>
+                  <p className="mt-0.5 line-clamp-2 font-body text-xs text-primary/60">
+                    {p?.bio_profesional ?? "No biography yet."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-3 pt-2">
+                <Link
+                  href="/dashboard/edit"
+                  className="inline-flex items-center gap-2 bg-primary px-6 py-3 font-label text-[0.5625rem] uppercase tracking-widest text-on-primary transition-colors hover:bg-secondary"
+                >
+                  <span className="material-symbols-outlined text-sm">edit</span>
+                  Edit profile
+                </Link>
+                <Link
+                  href={`/model/${user.id}`}
+                  className="inline-flex items-center gap-2 border border-primary/20 px-6 py-3 font-label text-[0.5625rem] uppercase tracking-widest text-primary transition-colors hover:bg-primary hover:text-on-primary"
+                >
+                  <span className="material-symbols-outlined text-sm">visibility</span>
+                  View public profile
+                </Link>
+              </div>
             </div>
           </div>
-          <Link
-            href={`/model/${user.id}`}
-            className="w-full bg-primary px-8 py-3 text-center font-headline text-[0.625rem] font-bold uppercase tracking-widest text-on-primary transition-colors hover:bg-secondary md:w-auto md:px-10 md:py-4"
-          >
-            View profile
-          </Link>
-        </div>
+
+          {/* AI Bio quick action */}
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6">
+            <GenerateBioButton />
+            <p className="font-label text-[9px] uppercase tracking-widest text-primary/30 md:text-[0.5625rem]">
+              {p?.bio_profesional
+                ? "Regenerate with your latest profile data."
+                : "Complete your profile, then generate a professional bio."}
+            </p>
+          </div>
+        </section>
       </main>
 
       <SiteFooter />

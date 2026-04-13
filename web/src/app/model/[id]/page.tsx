@@ -3,8 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BookingForm } from "@/app/model/[id]/booking-form";
 import { MobileBottomNav } from "@/components/mobile-nav";
-import { PageBack } from "@/components/page-back";
 import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
 import { createClient } from "@/lib/supabase/server";
 import type { ModelProfile } from "@/types/database";
 
@@ -23,12 +23,23 @@ export default async function ModelPortfolioPage({
   const supabase = await createClient();
   const { data: profile, error: profileError } = await supabase
     .from("model_profiles")
-    .select("user_id, nombre, altura, color_ojos, medidas, bio_profesional, foto_url, role")
+    .select("user_id, nombre, altura, color_ojos, medidas, bio_profesional, foto_url, role, tarifa_hora")
     .eq("user_id", id)
     .maybeSingle();
 
-  if (profileError || !profile) notFound();
-  const m = profile as Pick<ModelProfile, "user_id" | "nombre" | "altura" | "color_ojos" | "medidas" | "bio_profesional" | "foto_url" | "role">;
+  // Fallback: if tarifa_hora column doesn't exist yet, retry without it
+  let finalProfile = profile;
+  if (profileError && !profile) {
+    const { data: fallback } = await supabase
+      .from("model_profiles")
+      .select("user_id, nombre, altura, color_ojos, medidas, bio_profesional, foto_url, role")
+      .eq("user_id", id)
+      .maybeSingle();
+    finalProfile = fallback ? { ...fallback, tarifa_hora: null } : null;
+  }
+
+  if (!finalProfile) notFound();
+  const m = finalProfile as Pick<ModelProfile, "user_id" | "nombre" | "altura" | "color_ojos" | "medidas" | "bio_profesional" | "foto_url" | "tarifa_hora" | "role">;
 
   const {
     data: { user },
@@ -36,13 +47,15 @@ export default async function ModelPortfolioPage({
 
   let isClient = false;
   let userEmail = "";
+  let userRole: "admin" | "model" | "client" | null = null;
   if (user) {
     const { data: userProfile } = await supabase
       .from("model_profiles")
       .select("role")
       .eq("user_id", user.id)
       .maybeSingle();
-    isClient = userProfile?.role === "client";
+    userRole = (userProfile?.role as typeof userRole) ?? null;
+    isClient = userRole === "client";
     userEmail = user.email ?? "";
   }
 
@@ -59,6 +72,7 @@ export default async function ModelPortfolioPage({
       stats.push({ label: "Measurements", value: m.medidas });
     }
   }
+  if (m.tarifa_hora) stats.push({ label: "Rate/hr", value: `$${m.tarifa_hora}` });
 
   const photo = m.foto_url ?? PLACEHOLDER_PHOTO;
   const firstName = m.nombre.split(" ")[0];
@@ -66,44 +80,9 @@ export default async function ModelPortfolioPage({
 
   return (
     <>
-      {/* Mobile header */}
-      <header className="fixed left-0 right-0 top-0 z-50 flex w-full items-center border-b-[0.5px] border-primary/10 bg-surface px-4 py-3 md:hidden">
-        <div className="relative flex w-full items-center justify-between gap-2">
-          <PageBack href="/#roster" label="Roster" className="shrink-0" />
-          <Link
-            href="/"
-            className="absolute left-1/2 min-w-0 max-w-[48%] -translate-x-1/2 truncate text-center font-headline text-lg font-black uppercase tracking-tighter text-primary"
-          >
-            Catwalk
-          </Link>
-          <Link
-            href="/login"
-            className="shrink-0 font-label text-[10px] font-semibold uppercase tracking-widest text-secondary"
-          >
-            Login
-          </Link>
-        </div>
-      </header>
+      <SiteHeader role={userRole} />
 
-      {/* Desktop header */}
-      <header className="fixed left-0 right-0 top-0 z-50 hidden bg-surface md:block">
-        <nav className="mx-auto flex w-full max-w-[1440px] items-center justify-between gap-6 px-12 py-8">
-          <div className="flex min-w-0 items-center gap-4">
-            <PageBack href="/#roster" label="Roster" />
-            <Link href="/" className="truncate font-headline text-3xl font-black uppercase tracking-tighter text-primary">
-              Catwalk
-            </Link>
-          </div>
-          <div className="flex items-center gap-12">
-            <Link href="/#roster" className="border-b-2 border-secondary pb-1 font-headline text-[0.6875rem] uppercase tracking-widest text-secondary">Models</Link>
-            <Link href="/#philosophy" className="font-headline text-[0.6875rem] uppercase tracking-widest text-primary opacity-60 transition-opacity duration-150 hover:opacity-100">Philosophy</Link>
-            <Link href="/register" className="font-headline text-[0.6875rem] uppercase tracking-widest text-primary opacity-60 transition-opacity duration-150 hover:opacity-100">Apply</Link>
-          </div>
-          <Link href="/login" className="font-headline text-[0.6875rem] uppercase tracking-widest text-primary opacity-60 transition-opacity duration-150 hover:opacity-100">Client Login</Link>
-        </nav>
-      </header>
-
-      <main className="pb-20 pt-14 md:pb-0 md:pt-32">
+      <main className="pb-20 pt-20 md:pb-0 md:pt-32">
         {/* Mobile hero name */}
         <section className="mb-8 px-6 md:hidden">
           <span className="mb-2 block font-label text-[10px] font-bold uppercase tracking-[0.2em] text-secondary">
@@ -216,6 +195,7 @@ export default async function ModelPortfolioPage({
               modelId={id}
               modelName={m.nombre}
               clientEmail={userEmail}
+              modelRate={m.tarifa_hora}
             />
           ) : (
             <div className="flex flex-col items-center gap-4">
@@ -252,6 +232,7 @@ export default async function ModelPortfolioPage({
                 modelId={id}
                 modelName={m.nombre}
                 clientEmail={userEmail}
+                modelRate={m.tarifa_hora}
               />
             </div>
           ) : (
@@ -290,7 +271,7 @@ export default async function ModelPortfolioPage({
       </main>
 
       <SiteFooter />
-      <MobileBottomNav role="public" />
+      <MobileBottomNav role={userRole ?? "public"} />
     </>
   );
 }

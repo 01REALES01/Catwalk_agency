@@ -8,25 +8,26 @@ type NavItem = { href: string; label: string; icon: string };
 const PUBLIC_ITEMS: NavItem[] = [
   { href: "/", label: "Home", icon: "home" },
   { href: "/#roster", label: "Models", icon: "groups" },
-  { href: "/login", label: "Login", icon: "lock" },
+  { href: "/register", label: "Join", icon: "person_add" },
+  { href: "/login", label: "Login", icon: "login" },
 ];
 
 const MODEL_ITEMS: NavItem[] = [
-  { href: "/dashboard", label: "Home", icon: "dashboard" },
-  { href: "/#roster", label: "Models", icon: "groups" },
-  { href: "/", label: "Portfolio", icon: "person" },
+  { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
+  { href: "/#roster", label: "Roster", icon: "groups" },
+  { href: "/", label: "Home", icon: "home" },
 ];
 
 const CLIENT_ITEMS: NavItem[] = [
-  { href: "/client", label: "Bookings", icon: "event" },
-  { href: "/#roster", label: "Models", icon: "groups" },
+  { href: "/client", label: "My Bookings", icon: "event" },
+  { href: "/#roster", label: "Browse", icon: "groups" },
   { href: "/", label: "Home", icon: "home" },
 ];
 
 const ADMIN_ITEMS: NavItem[] = [
-  { href: "/admin", label: "HQ", icon: "dashboard" },
-  { href: "/#roster", label: "Talent", icon: "groups" },
-  { href: "/dashboard", label: "Profile", icon: "person" },
+  { href: "/admin", label: "HQ", icon: "admin_panel_settings" },
+  { href: "/admin#models", label: "Models", icon: "groups" },
+  { href: "/admin#bookings", label: "Bookings", icon: "event" },
 ];
 
 export function MobileBottomNav({

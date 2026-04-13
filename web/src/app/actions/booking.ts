@@ -29,6 +29,9 @@ export async function createBooking(
     return { error: "Nombre, email y modelo son obligatorios." };
   }
 
+  const hours = parseFloat(String(formData.get("hours") ?? "")) || null;
+  const budget = parseFloat(String(formData.get("budget") ?? "")) || null;
+
   const { error } = await supabase.from("bookings").insert({
     client_id: user.id,
     model_id,
@@ -37,6 +40,8 @@ export async function createBooking(
     event_type,
     event_date,
     event_location,
+    hours,
+    budget,
     message,
   });
 
@@ -67,7 +72,26 @@ export async function updateBookingStatus(
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (profile?.role !== "admin") return { error: "Solo admin puede hacer esto." };
+  const isAdmin = profile?.role === "admin";
+
+  // Models can only accept/decline bookings assigned to them
+  if (!isAdmin) {
+    const { data: booking } = await supabase
+      .from("bookings")
+      .select("model_id, status")
+      .eq("id", bookingId)
+      .maybeSingle();
+
+    if (!booking || booking.model_id !== user.id) {
+      return { error: "No tienes permiso para modificar este booking." };
+    }
+    if (booking.status !== "pending") {
+      return { error: "Solo puedes aceptar o rechazar bookings pendientes." };
+    }
+    if (status !== "confirmed" && status !== "declined") {
+      return { error: "Solo puedes confirmar o rechazar." };
+    }
+  }
 
   const update: Record<string, string> = { status };
   if (adminNotes !== undefined) update.admin_notes = adminNotes;

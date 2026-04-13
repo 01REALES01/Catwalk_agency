@@ -15,6 +15,7 @@ const HERO_MOBILE =
 
 export default async function Home() {
   let models: ModelProfile[] = [];
+  let userRole: "admin" | "model" | "client" | null = null;
   try {
     const supabase = await createClient();
     const { data } = await supabase
@@ -22,6 +23,16 @@ export default async function Home() {
       .select("*")
       .order("nombre", { ascending: true });
     models = (data as ModelProfile[]) ?? [];
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: profile } = await supabase
+        .from("model_profiles")
+        .select("role")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      userRole = (profile?.role as typeof userRole) ?? null;
+    }
   } catch {
     models = [];
   }
@@ -33,7 +44,7 @@ export default async function Home() {
 
   return (
     <>
-      <SiteHeader />
+      <SiteHeader role={userRole} />
       <main className="pt-14 pb-16 md:pb-0 md:pt-24">
         {/* Mobile hero — diseño editorial original (full bleed) */}
         <section

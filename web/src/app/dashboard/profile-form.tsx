@@ -47,13 +47,25 @@ export function ProfileForm({ profile }: { profile: ModelProfile | null }) {
             placeholder="Marrón, verde…"
           />
         </div>
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="medidas">Medidas (busto-cintura-cadera u otras)</Label>
+        <div className="space-y-2">
+          <Label htmlFor="medidas">Medidas (busto-cintura-cadera)</Label>
           <Input
             id="medidas"
             name="medidas"
             defaultValue={profile?.medidas ?? ""}
             placeholder="84-61-89"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="tarifa_hora">Tarifa por hora (USD)</Label>
+          <Input
+            id="tarifa_hora"
+            name="tarifa_hora"
+            inputMode="decimal"
+            defaultValue={
+              profile?.tarifa_hora != null ? String(profile.tarifa_hora) : ""
+            }
+            placeholder="150"
           />
         </div>
         <div className="space-y-2 md:col-span-2">
