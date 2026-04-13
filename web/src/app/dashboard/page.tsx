@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { signOut } from "@/app/actions/auth";
-import { ProfileForm } from "@/app/dashboard/profile-form";
 import { GenerateBioButton } from "@/app/dashboard/generate-bio-button";
+import { PhotoUpload } from "@/app/dashboard/photo-upload";
+import { ProfileForm } from "@/app/dashboard/profile-form";
 import { MobileBottomNav } from "@/components/mobile-nav";
 import { PageBack } from "@/components/page-back";
 import { SiteFooter } from "@/components/site-footer";
@@ -220,19 +221,34 @@ export default async function DashboardPage() {
         </section>
 
         {/* ════════════════════════════════════════════════
-            3. PROFILE / MEASUREMENTS FORM
+            3. PROFILE PHOTO + MEASUREMENTS FORM
         ════════════════════════════════════════════════ */}
         <section className="mb-10 md:mb-24">
           <div className="mb-6 flex items-baseline justify-between md:mb-8">
             <h2 className="font-headline text-xl font-black uppercase tracking-tighter md:text-4xl">
-              Measurements
+              Profile
             </h2>
             <span className="font-label text-[9px] uppercase italic tracking-widest text-primary/35 md:text-[0.5625rem]">
               {profileComplete ? "Profile complete" : "Please complete"}
             </span>
           </div>
-          <div className="max-w-3xl">
-            <ProfileForm profile={p} />
+
+          {/* Photo upload */}
+          <div className="mb-10 md:mb-12">
+            <p className="mb-4 font-label text-[0.5625rem] uppercase tracking-widest text-primary/45 md:text-[0.625rem]">
+              Profile photo
+            </p>
+            <PhotoUpload userId={user.id} currentUrl={p?.foto_url ?? null} />
+          </div>
+
+          {/* Measurements form */}
+          <div>
+            <p className="mb-4 font-label text-[0.5625rem] uppercase tracking-widest text-primary/45 md:text-[0.625rem]">
+              Measurements &amp; info
+            </p>
+            <div className="max-w-3xl">
+              <ProfileForm profile={p} />
+            </div>
           </div>
         </section>
 

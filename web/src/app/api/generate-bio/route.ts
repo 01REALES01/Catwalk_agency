@@ -2,27 +2,45 @@ import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
 export async function POST() {
+  if (!process.env.OPENAI_API_KEY) {
+    return NextResponse.json(
+      { error: "OPENAI_API_KEY no está configurada en el servidor." },
+      { status: 500 },
+    );
+  }
+
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
   const supabase = await createClient();
   const {
     data: { user },
+    error: authError,
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  if (authError || !user) {
+    return NextResponse.json(
+      { error: "No autorizado. Inicia sesión de nuevo." },
+      { status: 401 },
+    );
   }
 
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("model_profiles")
-    .select("*")
+    .select("nombre, altura, color_ojos, medidas, bio_profesional")
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (!profile) {
+  if (profileError) {
     return NextResponse.json(
-      { error: "Primero completa tu perfil con al menos tu nombre." },
+      { error: `Error cargando perfil: ${profileError.message}` },
+      { status: 500 },
+    );
+  }
+
+  if (!profile || !profile.nombre) {
+    return NextResponse.json(
+      { error: "Primero guarda tu perfil con al menos tu nombre." },
       { status: 400 },
     );
   }
@@ -48,10 +66,17 @@ No incluyas datos inventados. Solo embellece lo proporcionado.`;
 
     const bio = completion.choices[0]?.message?.content?.trim() ?? "";
 
-    await supabase
+    const { error: updateError } = await supabase
       .from("model_profiles")
       .update({ bio_profesional: bio })
       .eq("user_id", user.id);
+
+    if (updateError) {
+      return NextResponse.json(
+        { error: `Bio generada pero error al guardar: ${updateError.message}` },
+        { status: 500 },
+      );
+    }
 
     return NextResponse.json({ bio });
   } catch (err) {
